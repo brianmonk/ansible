@@ -1,0 +1,15 @@
+- hosts: 192.168.200.163
+
+  remote_user: root
+
+  vars:
+    password: $6$bffoCRSShO2C$bcBnEWhNecxdnVLzcBKxUg8QlmIUQ6EX7SLA5FMyXUafg5lRQjWn8NO8a/Oi53rmJ57I5zxOdZy9Fz9LWtGjv0
+
+  tasks:
+     - name: create cephuser group
+       group: name=cephuser
+       become: true
+
+     - name: create cephuser
+       user: name=cephuser password={{password}} group=cephuser shell=/bin/bash
+

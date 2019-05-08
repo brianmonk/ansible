@@ -1,0 +1,37 @@
+ - hosts: 192.168.200.163
+   tasks:
+
+
+      - name: Install pip
+        apt:
+          name: python-pip
+          update_cache: yes
+          state: present
+
+      - name: Install the Python MySQLB module
+        pip: name=MySQL-python
+
+      - name: Sets the root password 
+        mysql_user: user=root password="{{ mysql_root_password }}" host=localhost
+
+      - name: Sets the root password 
+        mysql_user: user=root password="{{ mysql_root_password }}" host=localhost
+
+      - name: Secures the MySQL root user for IPV6 localhost (::1)
+        mysql_user: user="root" password="{{ mysql_root_password }}" host="::1"
+
+      - name: Secures the MySQL root user for IPV4 localhost (127.0.0.1)
+        mysql_user: user="root" password="{{ mysql_root_password }}" host="127.0.0.1"
+
+      - name: Secures the MySQL root user for localhost domain (localhost)
+        mysql_user: user="root" password="{{ mysql_root_password }}" host="localhost"
+
+      - name: Secures the MySQL root user for server_hostname domain
+        mysql_user: user="root" password="{{ mysql_root_password }}" host="{{ ansible_fqdn }}"
+
+      - name: Removes the MySQL test database
+        mysql_db: db=test state=absent
+   
+
+   vars:
+     mysql_root_password: $6$bffoCRSShO2C$bcBnEWhNecxdnVLzcBKxUg8QlmIUQ6EX7SLA5FMyXUafg5lRQjWn8NO8a/Oi53rmJ57I5zxOdZy9Fz9LWtGjv0

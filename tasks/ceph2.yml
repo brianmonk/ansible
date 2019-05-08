@@ -1,0 +1,29 @@
+- hosts: 192.168.200.168
+
+   tasks:
+
+      - name: config file
+        copy:
+          dest: /home/cephuser/.ssh/config
+          mode: 0644
+          content:
+            Host ceph-admin
+                    Hostname ceph-admin
+                    User cephuser
+
+            Host zireael
+                    Hostname zireael
+                    User cephuser
+
+            Host avallach
+                    Hostname avallach
+                    User cephuser
+
+            Host vattghern
+                    Hostname vattghern
+                    User cephuser
+
+            Host gwynbleidd
+                    Hostname gwynbleidd
+                    User cephuser
+

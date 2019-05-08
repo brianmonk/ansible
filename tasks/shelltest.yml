@@ -1,0 +1,9 @@
+- hosts: 192.168.200.161
+ 
+  tasks:
+
+    - name: shell
+      shell: >
+        mkdir /tmp/1 |
+        mkdir /tmp/2
+      

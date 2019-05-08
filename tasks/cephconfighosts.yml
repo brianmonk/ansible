@@ -1,0 +1,34 @@
+- hosts: debiancluster
+  tasks:
+  - name: create config file
+    copy:
+      dest: "/home/cephuser/.ssh/config"
+      content: |
+        Host rocinante
+                Hostname rocinante
+                User cephuser
+
+        Host ceph-admin
+                Hostname ceph-admin
+                User cephuser
+
+        Host zireael
+                Hostname zireael
+                User cephuser
+
+        Host avallach
+                Hostname avallach
+                User cephuser
+
+        Host vattghern
+                Hostname vattghern
+                User cephuser
+
+        Host gwynbleidd
+                Hostname gwynbleidd
+                User cephuser
+      group: cephuser
+      owner: cephuser
+      mode: 0555
+      force: no
+

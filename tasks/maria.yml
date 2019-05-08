@@ -1,0 +1,102 @@
+ - hosts: 192.168.200.163
+
+   gather_facts: False
+   pre_tasks:
+     - name: Install python for Ansible
+       raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
+       register: output
+       changed_when: output.stdout != ""
+     - setup: # aka gather_facts
+
+
+   tasks:
+      - name: fix hosts file
+        blockinfile:
+          name: /etc/hosts
+          block: |
+            192.168.100.2   Eros.infocom.pmr        Eros
+            192.168.100.3   Ceres.infocom.pmr       Ceres
+            192.168.100.4   Phoebe.infocom.pmr      Phoebe
+            192.168.100.5   Ganymede.infocom.pmr    Ganymede        
+            192.168.200.112 rocinante.infocom.pmr   rocinante
+
+      - name: fix sshd
+        blockinfile:
+          name: /etc/ssh/sshd_config
+          block: |
+            Port 22
+            
+      - name: fix slist
+        lineinfile:
+          name: /etc/apt/sources.list
+          regexp: '^deb cdrom'
+          line: '# deb cdrom:[Debian GNU/Linux 9.4.0 _Stretch_ - Official amd64 xfce-CD Binary-1 20180310-11:21]/ stretch main'
+          backrefs: yes
+
+      - name: test
+        shell: >
+          lsb_release -sc
+        register: release
+
+      - debug: var=release.stdout
+ 
+      
+      - name: KEY
+        shell: >
+          apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8
+
+      - name: add
+        shell: >
+          add-apt-repository 'deb [arch=amd64,arm64,ppc64el] http://mirror.netinch.com/pub/mariadb/repo/10.3/debian {{release.stdout}} main'
+
+      - name: Install software
+        apt: pkg={{ item }} state=installed update_cache=true
+        with_items:
+          - mc
+          - mariadb-server
+          - mariadb-client
+          - rsync
+
+      - name: remove apparmor
+        apt:
+          name: apparmor
+          state: absent
+
+      - name: mySQL stop
+        service:
+          name: mysql
+          state: stopped
+        
+      - debug: var=ansible_default_ipv4.address
+                  
+      - debug: var=ansible_hostname
+
+      - name: fix config file
+        blockinfile:
+          name: /etc/mysql/conf.d/mariadb.cnf
+          block: |
+            character-set-server = utf8
+            character_set_server = utf8
+      
+      - name: fix wsrep
+        copy:
+          dest: "/etc/mysql/mariadb.conf.d/galera.cnf"
+          content: |
+            [mysqld]
+            bind-address=0.0.0.0
+            default_storage_engine=InnoDB
+            binlog_format=row
+            innodb_autoinc_lock_mode=2
+
+            # Galera cluster configuration
+            wsrep_on=ON
+            wsrep_provider=/usr/lib/galera/libgalera_smm.so
+            wsrep_cluster_address="gcomm://192.168.200.161,192.168.200.162,192.168.200.163,192.168.200.164"
+            wsrep_cluster_name="mariadb-galera-cluster"
+            wsrep_sst_method=rsync
+
+            # Cluster node configuration
+            wsrep_node_address="{{ansible_default_ipv4.address}}"
+            wsrep_node_name="{{ansible_hostname}}"     
+
+
